@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meta × AI D2D Workflow Research</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: rgba(255,255,255,0.07);
+    --accent: #5b6af0;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --accent4: #fb923c;
+    --accent5: #f472b6;
+    --text: #e8e8f0;
+    --text-dim: #7878a0;
+    --text-faint: #3a3a5c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.4;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 80px 60px;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(91,106,240,0.18) 0%, transparent 70%);
+    top: -200px; right: -150px;
+    pointer-events: none;
+  }
+  .hero-glow2 {
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%);
+    bottom: 0; left: 100px;
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(91,106,240,0.4);
+    padding: 6px 14px; border-radius: 20px;
+    margin-bottom: 32px;
+    width: fit-content;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(52px, 7vw, 96px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+  }
+
+  .hero h1 .brand {
+    background: linear-gradient(135deg, #5b6af0, #a78bfa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .hero h1 .x {
+    color: var(--text-dim);
+    font-weight: 400;
+    margin: 0 12px;
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text-dim);
+    max-width: 560px;
+    margin-top: 24px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    display: flex; gap: 40px;
+    margin-top: 48px;
+  }
+
+  .hero-stat {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+
+  .hero-stat .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px; font-weight: 700;
+    color: var(--text);
+  }
+
+  .hero-stat .label {
+    font-size: 12px; color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px; left: 60px;
+    font-size: 12px; color: var(--text-faint);
+    letter-spacing: 2px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .scroll-hint::before {
+    content: '';
+    display: block;
+    width: 40px; height: 1px;
+    background: var(--text-faint);
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 60px 120px;
+  }
+
+  .sec-header {
+    display: flex; align-items: baseline; gap: 20px;
+    margin-bottom: 40px;
+    padding-top: 80px;
+  }
+
+  .sec-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 600;
+    color: var(--text-faint);
+    letter-spacing: 3px;
+  }
+
+  .sec-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px; font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .sec-line {
+    flex: 1; height: 1px;
+    background: var(--border);
+  }
+
+  /* ── WORKFLOW ── */
+  .workflow-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .workflow-col {
+    padding: 36px;
+    background: var(--surface);
+    position: relative;
+  }
+
+  .workflow-col:first-child {
+    border-right: 1px solid var(--border);
+  }
+
+  .workflow-col-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 28px;
+    display: inline-block;
+  }
+
+  .tag-incremental {
+    background: rgba(52,211,153,0.1);
+    color: var(--accent3);
+    border: 1px solid rgba(52,211,153,0.2);
+  }
+
+  .tag-innovation {
+    background: rgba(91,106,240,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(91,106,240,0.2);
+  }
+
+  .workflow-col h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px; font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  .steps { display: flex; flex-direction: column; gap: 0; }
+
+  .step {
+    display: flex; gap: 16px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step:last-child { border-bottom: none; }
+
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 700;
+    color: var(--text-faint);
+    min-width: 24px;
+    padding-top: 2px;
+  }
+
+  .step-content { flex: 1; }
+
+  .step-label {
+    font-size: 13px; font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .step-detail {
+    font-size: 12px; color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .step-badge {
+    font-size: 10px; font-weight: 500;
+    padding: 2px 8px; border-radius: 10px;
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+
+  .badge-ai { background: rgba(167,139,250,0.15); color: var(--accent2); }
+  .badge-eng { background: rgba(52,211,153,0.12); color: var(--accent3); }
+  .badge-design { background: rgba(244,114,182,0.12); color: var(--accent5); }
+  .badge-pm { background: rgba(251,146,60,0.12); color: var(--accent4); }
+  .badge-all { background: rgba(91,106,240,0.12); color: var(--accent); }
+
+  /* ── ROLES ── */
+  .roles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .role-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .role-card:hover {
+    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-3px);
+  }
+
+  .role-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .role-card.pm::before { background: linear-gradient(90deg, var(--accent4), transparent); }
+  .role-card.design::before { background: linear-gradient(90deg, var(--accent5), transparent); }
+  .role-card.eng::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+
+  .role-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .role-icon.pm { background: rgba(251,146,60,0.1); }
+  .role-icon.design { background: rgba(244,114,182,0.1); }
+  .role-icon.eng { background: rgba(52,211,153,0.1); }
+
+  .role-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .role-items {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  .role-items li {
+    font-size: 13px; color: var(--text-dim);
+    display: flex; gap: 10px; align-items: flex-start;
+    line-height: 1.5;
+  }
+
+  .role-items li::before {
+    content: '→';
+    color: var(--text-faint);
+    flex-shrink: 0;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* ── AI ROLE ── */
+  .ai-role {
+    background: linear-gradient(135deg, rgba(91,106,240,0.08), rgba(167,139,250,0.05));
+    border: 1px solid rgba(91,106,240,0.2);
+    border-radius: 16px;
+    padding: 32px;
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .ai-role-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .ai-role-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .ai-item { display: flex; gap: 12px; align-items: flex-start; }
+
+  .ai-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  .ai-item-text { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+  /* ── TOOLS ── */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .tool-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: default;
+  }
+
+  .tool-card:hover {
+    border-color: rgba(255,255,255,0.12);
+    background: var(--surface2);
+  }
+
+  .tool-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .tool-desc {
+    font-size: 12px; color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .tool-tag {
+    display: inline-block;
+    font-size: 10px; font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-top: 10px;
+    background: rgba(91,106,240,0.1);
+    color: var(--accent);
+  }
+
+  /* ── BENEFITS / RISKS ── */
+  .br-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .br-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  .br-card.benefits { border-color: rgba(52,211,153,0.15); }
+  .br-card.risks { border-color: rgba(251,146,60,0.15); }
+
+  .br-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .br-title .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .benefits .br-title .icon { background: rgba(52,211,153,0.1); }
+  .risks .br-title .icon { background: rgba(251,146,60,0.1); }
+
+  .br-list {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+
+  .br-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 13px; color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .br-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  .benefits .br-dot { background: var(--accent3); }
+  .risks .br-dot { background: var(--accent4); }
+
+  /* ── INSIGHT BANNER ── */
+  .insight-banner {
+    background: linear-gradient(135deg, rgba(91,106,240,0.12), rgba(167,139,250,0.08));
+    border: 1px solid rgba(91,106,240,0.25);
+    border-radius: 20px;
+    padding: 48px;
+    margin-top: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight-banner::before {
+    content: '"';
+    position: absolute;
+    top: -20px; left: 40px;
+    font-family: 'Syne', sans-serif;
+    font-size: 180px; font-weight: 800;
+    color: rgba(91,106,240,0.08);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .insight-banner-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .insight-banner p {
+    font-size: 20px;
+    line-height: 1.7;
+    color: var(--text);
+    max-width: 820px;
+    font-weight: 300;
+  }
+
+  .insight-banner strong {
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 60px;
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 1200px; margin: 0 auto;
+  }
+
+  footer p { font-size: 12px; color: var(--text-faint); letter-spacing: 1px; }
+
+  /* ── FADE IN ── */
+  .fade-in {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-in.visible {
+    opacity: 1; transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    .hero { padding: 60px 30px; }
+    main { padding: 0 30px 80px; }
+    .workflow-grid, .roles-grid, .tools-grid, .br-grid { grid-template-columns: 1fr; }
+    .workflow-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .ai-role-items { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-tag">AI D2D Workflow Research · Company A</div>
+  <h1>
+    <span class="brand">Meta</span>
+    <span class="x">×</span>AI
+  </h1>
+  <h1>D2D Workflow</h1>
+  <p class="hero-sub">From lengthy Sprints to Vibe Coding — how AI is reshaping collaboration between PM, Design, and Engineering</p>
+  <div class="hero-meta">
+    <div class="hero-stat">
+      <span class="num">3–5</span>
+      <span class="label">Person Teams</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">∞</span>
+      <span class="label">Forever Context</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">5×</span>
+      <span class="label">Coding Speed Gain</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">24h</span>
+      <span class="label">AI Works Overnight</span>
+    </div>
+  </div>
+  <div class="scroll-hint">SCROLL TO EXPLORE</div>
+</section>
+
+<main>
+
+  <!-- 01 WORKFLOW -->
+  <div class="sec-header fade-in">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">Workflow Process</h2>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="workflow-grid fade-in">
+    <!-- Incremental -->
+    <div class="workflow-col">
+      <span class="workflow-col-tag tag-incremental">Incremental Feature</span>
+      <h3>Iterating on Existing Features</h3>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <div class="step-content">
+            <div class="step-label">Roadmap Planning</div>
+            <div class="step-detail">Follows traditional flow — roadmap first, then scheduling</div>
+          </div>
+          <span class="step-badge badge-pm">PM</span>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <div class="step-content">
+            <div class="step-label">Wire → Design in Figma</div>
+            <div class="step-detail">Full design spec in Figma, with complete design review process</div>
+          </div>
+          <span class="step-badge badge-design">Design</span>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <div class="step-content">
+            <div class="step-label">Small UI Changes → Vibe Code Directly</div>
+            <div class="step-detail">For UI-only changes (no backend needed), designers write and ship code directly in VS Code / Cursor</div>
+          </div>
+          <span class="step-badge badge-ai">AI</span>
+        </div>
+        <div class="step">
+          <span class="step-num">04</span>
+          <div class="step-content">
+            <div class="step-label">Engineer Code Review</div>
+            <div class="step-detail">Engineers review code quality before the diff can be shipped</div>
+          </div>
+          <span class="step-badge badge-eng">Eng</span>
+        </div>
+        <div class="step">
+          <span class="step-num">05</span>
+          <div class="step-content">
+            <div class="step-label">Designer as UI Reviewer</div>
+            <div class="step-detail">All UI-related code diffs require Designer endorsement before shipping</div>
+          </div>
+          <span class="step-badge badge-design">Design</span>
+        </div>
+        <div class="step">
+          <span class="step-num">06</span>
+          <div class="step-content">
+            <div class="step-label">Design Critique</div>
+            <div class="step-detail">Regular structured quality reviews to maintain design standards</div>
+          </div>
+          <span class="step-badge badge-all">All</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Innovation -->
+    <div class="workflow-col">
+      <span class="workflow-col-tag tag-innovation">0 → 1 Innovation</span>
+      <h3>Exploring New Features</h3>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <div class="step-content">
+            <div class="step-label">AI Agents Run Overnight</div>
+            <div class="step-detail">Second Brain (Claude) + custom agents auto-run UXR analysis, competitor research, and concept generation while you sleep</div>
+          </div>
+          <span class="step-badge badge-ai">AI</span>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <div class="step-content">
+            <div class="step-label">Morning Human Judgment Filter</div>
+            <div class="step-detail">Review AI outputs like reading a newspaper — apply human judgment to shortlist promising directions</div>
+          </div>
+          <span class="step-badge badge-design">Design</span>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <div class="step-content">
+            <div class="step-label">Cursor Scrappy Prototype</div>
+            <div class="step-detail">Quickly build a Cursor prototype to align the team on direction (no live data at this stage)</div>
+          </div>
+          <span class="step-badge badge-design">Design</span>
+        </div>
+        <div class="step">
+          <span class="step-num">04</span>
+          <div class="step-content">
+            <div class="step-label">Engineer Sets Up Scaffolding</div>
+            <div class="step-detail">Engineer builds backend structure, gate keeping, dev server sandbox — enables live data environment</div>
+          </div>
+          <span class="step-badge badge-eng">Eng</span>
+        </div>
+        <div class="step">
+          <span class="step-num">05</span>
+          <div class="step-content">
+            <div class="step-label">3–5 Person Parallel Vibe Coding</div>
+            <div class="step-detail">PM / Design / Eng each work in their own sandboxes; sync 3× per week (Mon/Wed/Fri standup)</div>
+          </div>
+          <span class="step-badge badge-all">All</span>
+        </div>
+        <div class="step">
+          <span class="step-num">06</span>
+          <div class="step-content">
+            <div class="step-label">Dogfooding with Live Data</div>
+            <div class="step-detail">Internal testing with real data — quickly validate product traction and surface unexpected UX issues</div>
+          </div>
+          <span class="step-badge badge-all">All</span>
+        </div>
+        <div class="step">
+          <span class="step-num">07</span>
+          <div class="step-content">
+            <div class="step-label">Return to Figma + Design Critique</div>
+            <div class="step-detail">Once direction is validated, return to Figma for full layout polish and formal design critique</div>
+          </div>
+          <span class="step-badge badge-design">Design</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 ROLES -->
+  <div class="sec-header fade-in">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">Role Breakdown</h2>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="roles-grid fade-in">
+    <div class="role-card pm">
+      <div class="role-icon pm">📋</div>
+      <div class="role-title">PM</div>
+      <ul class="role-items">
+        <li>Quickly build scrappy prototypes using AI or Figma Make to align the team</li>
+        <li>Define feature scope and facilitate standup meetings</li>
+        <li>Assign tasks and confirm dependency order</li>
+        <li>Participate in vibe coding — contributes functional code</li>
+      </ul>
+    </div>
+    <div class="role-card design">
+      <div class="role-icon design">🎨</div>
+      <div class="role-title">Design</div>
+      <ul class="role-items">
+        <li>Build Cursor prototypes to rapidly align interaction direction</li>
+        <li>Vibe code frontend UI directly and ship code diffs</li>
+        <li>Serve as reviewer for all UI-related code diffs</li>
+        <li>Return to Figma for polished layouts and lead design critiques</li>
+        <li>Build and maintain Component Library / Cursor Templates</li>
+      </ul>
+    </div>
+    <div class="role-card eng">
+      <div class="role-icon eng">⚙️</div>
+      <div class="role-title">Engineering</div>
+      <ul class="role-items">
+        <li>Set up scaffolding, backend, dev server, and gate keeping</li>
+        <li>Serve as code reviewer for all diffs</li>
+        <li>Lead technical standups and sync diff status across the team</li>
+        <li>Help Design understand server-side vs. client-side deployment boundaries</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ai-role fade-in">
+    <div class="ai-role-label">AI Role</div>
+    <div class="ai-role-items">
+      <div class="ai-item">
+        <div class="ai-dot"></div>
+        <div class="ai-item-text"><strong style="color:var(--accent2)">Second Brain (Claude)</strong><br>Connects all knowledge in a forever context state — persistent context across all work streams</div>
+      </div>
+      <div class="ai-item">
+        <div class="ai-dot"></div>
+        <div class="ai-item-text"><strong style="color:var(--accent2)">Overnight Agent Automation</strong><br>Auto-runs UXR analysis, competitor research, and concept generation — results ready by morning</div>
+      </div>
+      <div class="ai-item">
+        <div class="ai-dot"></div>
+        <div class="ai-item-text"><strong style="color:var(--accent2)">Multi-Role Agent Evaluation</strong><br>Plays User / UXR Researcher / Skeptical PM roles to pressure-test ideas from multiple angles</div>
+      </div>
+      <div class="ai-item">
+        <div class="ai-dot"></div>
+        <div class="ai-item-text"><strong style="color:var(--accent2)">Voice-to-Text Coding</strong><br>Voice-driven coding for everyone — delivers 5× speed improvement across all roles</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 TOOLS -->
+  <div class="sec-header fade-in">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">Tools & Artifacts</h2>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="tools-grid fade-in">
+    <div class="tool-card">
+      <div class="tool-name">Claude</div>
+      <div class="tool-desc">Second Brain — Forever Context mode, all knowledge permanently connected</div>
+      <span class="tool-tag">AI Core</span>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">Cursor</div>
+      <div class="tool-desc">Scrappy prototyping + vibe coding, wired up to component template libraries</div>
+      <span class="tool-tag">Prototype / Code</span>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">VS Code</div>
+      <div class="tool-desc">Connected to on-demand dev server; vibe code in sandbox and ship diffs</div>
+      <span class="tool-tag">Code</span>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">Figma</div>
+      <div class="tool-desc">Final-stage layout polish and the primary venue for design critique</div>
+      <span class="tool-tag">Design</span>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">Figma Make</div>
+      <div class="tool-desc">Used by PMs to quickly generate scrappy prototypes for team alignment (quality is intentionally rough)</div>
+      <span class="tool-tag">Prototype</span>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">Custom Agents</div>
+      <div class="tool-desc">Built inside Claude, run UXR / idea exploration tasks autonomously overnight</div>
+      <span class="tool-tag">Automation</span>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">Voice-to-Text</div>
+      <div class="tool-desc">Speak prompts and code instead of typing — used by everyone, 5× faster</div>
+      <span class="tool-tag">Efficiency</span>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">MD Files / Agent Rules</div>
+      <div class="tool-desc">Task specs written before sleep, enabling AI to execute asynchronously overnight and surface results by morning</div>
+      <span class="tool-tag">Workflow</span>
+    </div>
+  </div>
+
+  <!-- 04 BENEFITS & RISKS -->
+  <div class="sec-header fade-in">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">Benefits & Risks</h2>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="br-grid fade-in">
+    <div class="br-card benefits">
+      <div class="br-title">
+        <div class="icon">✦</div>
+        Key Benefits
+      </div>
+      <ul class="br-list">
+        <li><div class="br-dot"></div><strong style="color:var(--text)">Dramatically faster delivery</strong> — a working product connected to live data in weeks, not months</li>
+        <li><div class="br-dot"></div><strong style="color:var(--text)">Overnight async work</strong> — AI doesn't sleep; results are ready to consume every morning</li>
+        <li><div class="br-dot"></div><strong style="color:var(--text)">Cross-role coding</strong> — PM, Design, and Eng all write code, massively shortening the handoff chain</li>
+        <li><div class="br-dot"></div><strong style="color:var(--text)">More realistic prototypes</strong> — live data prototypes surface issues that static Figma mocks never could</li>
+        <li><div class="br-dot"></div><strong style="color:var(--text)">Faster traction validation</strong> — dogfooding stage reveals product-market fit without waiting for a full build cycle</li>
+        <li><div class="br-dot"></div><strong style="color:var(--text)">Sprint waste eliminated</strong> — AI replaces large portions of UXR sprint work; no more multi-week ideation cycles</li>
+      </ul>
+    </div>
+    <div class="br-card risks">
+      <div class="br-title">
+        <div class="icon">⚠</div>
+        Limitations & Risks
+      </div>
+      <ul class="br-list">
+        <li><div class="br-dot"></div>Cursor prototypes don't connect to live data; poor collaborative visibility compared to Figma's shared canvas</li>
+        <li><div class="br-dot"></div>High conversion cost from Cursor → Figma; no tool currently bridges the two cleanly</li>
+        <li><div class="br-dot"></div>Requires significant upfront investment to build Component Libraries and Cursor Templates before vibe coding is reliable</li>
+        <li><div class="br-dot"></div>Tool access barriers in China (Claude Code / Cursor unavailable) — alternative solutions needed</li>
+        <li><div class="br-dot"></div>UI quality bar is intentionally lowered in early stages — scrappy output is rough by design</li>
+        <li><div class="br-dot"></div>No single role can fully replace the team yet — PM + Design + Eng collaboration remains essential for now</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- INSIGHT -->
+  <div class="insight-banner fade-in">
+    <div class="insight-banner-tag">Core Insight · Meta</div>
+    <p>
+      It used to take <strong>weeks of sprint work</strong> — concept designs, reviews, PRD writing — before an engineer could write a single line of code.<br>
+      Now it's <strong>completely inverted</strong>: AI explores ideas overnight, the team filters in the morning, and within days there's a <strong>playable prototype connected to real data</strong>. The quality of product conversation that becomes possible is in an entirely different league.
+    </p>
+  </div>
+
+</main>
+
+<footer>
+  <p>AI D2D Workflow Research · Company A — Meta</p>
+  <p>For TikTok CRM · Internal Research 2026</p>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
